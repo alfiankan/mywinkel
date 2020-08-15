@@ -1,0 +1,86 @@
+<link rel="stylesheet" href="assets\css\about.css">
+<div class="row">
+    <div class="col">
+      <h1 style="text-align: center;">Predict Your Business, Get More Revenue</h1>
+    </div>
+  </div>
+
+
+<main class="d-flex align-items-center">
+
+  
+  <div class="container" style="padding-left:150px; padding-right: 150px; padding-top: -20px;background:url(https://4.bp.blogspot.com/-1LMh8zmFxb4/WDQtEPVDzuI/AAAAAAAAFkU/u--BeXTN2uoLOmwToCMzU94v36kYe-OgQCLcB/s1600/loading8.gif) no-repeat center;">
+    MyWingkel is a business analysis platform using mathematical calculations that can support users to estimate a business opportunity somewhere.
+    some of the calculations that we analyze include:<br/><br/>
+    <ul>
+    <li> Percentage of product opportunities that will be sold in the area</li>
+    <li> the percentage of product categories that will be sold in the previously selected areas</li>
+    <li> Percentage of needs categories to be sold</li>
+    <li> and various other calculations</li><br/>
+  </ul>
+    MyWinkel can be a new breakthrough in the world of IT business in starting a business, especially those who want to start a small business.    
+  </div>
+
+  <div style="background:url(https://4.bp.blogspot.com/-1LMh8zmFxb4/WDQtEPVDzuI/AAAAAAAAFkU/u--BeXTN2uoLOmwToCMzU94v36kYe-OgQCLcB/s1600/loading8.gif) no-repeat center;"></div>
+    
+  
+</main>
+<script src="assets/js/bd-wizard.js"></script>
+<script>
+
+function getLokasi(){
+   $('#btn-cari-lokasi').fadeOut();
+    mapboxgl.accessToken = 'pk.eyJ1Ijoia3ViZWdpcyIsImEiOiJjazd1bHp1ZWMxMnhxM2xucWwyY2psbTJvIn0.xKBnJu7oqoAWuB_Ynv42GA';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/outdoors-v11',
+        center: [110.782593586327,-7.581862091377341],
+        zoom: 2
+    });
+    var marker = new mapboxgl.Marker({
+        draggable: true
+    })
+        .setLngLat([110.782593586327,-7.581862091377341])
+        .addTo(map);
+
+    map.on('move', function () {
+      //console.log(map.getCenter());
+      marker.setLngLat(map.getCenter())
+      //console.log(map.getCenter());
+    });
+
+    map.on('dragend', function(e) {
+    
+      var lngLat = map.getCenter();
+        //coordinates.style.display = 'block';
+        //coordinates.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
+        console.log(lngLat);
+
+    });
+
+    function onDragEnd() {
+        var lngLat = marker.getLngLat();
+        //coordinates.style.display = 'block';
+        //coordinates.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
+        console.log(lngLat);
+    }
+
+    marker.on('dragend', onDragEnd);
+
+    var geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl
+    });
+
+    
+    //geocoder.onAdd.console.log(geocoder.getLngLat);
+    geocoder.on('result', function(ev){
+      var searchResult = ev.result.geometry;
+      console.log(searchResult);
+      setLokasiJual($('.mapboxgl-ctrl-geocoder--input').val(),searchResult.coordinates);
+    });
+    
+
+    document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+ }
+</script>

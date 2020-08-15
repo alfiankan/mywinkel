@@ -1,0 +1,211 @@
+<style>
+    .marker{
+        background-repeat: no-repeat;
+    }
+</style>
+<div class="row">
+    <div class="col">
+      <h1 style="text-align: center;">Here Your Result</h1><br>
+      <h1 style="text-align: center;" id="hasil-persen"></h1>
+    </div>
+  </div>
+
+
+<main class="d-flex align-items-center">
+        <div class="container">
+            <div class="map" id="map2"></div>
+            <hr>
+            <h1 style="text-align: left;">Popularity</h1>
+            <p>Click the bar to search the Location</p>
+            <canvas id="rating"></canvas>
+            <canvas id="popular"></canvas>
+        </div>
+</main>
+
+<div class="modal fade" id="tokoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel"></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <img src="" id="tokoImg" class="img-fluid" alt="Foto tidak tersedia">
+            <p style="text-align: center;" id="alamat"></p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+<script src="assets/js/bd-wizard.js"></script>
+<script>
+    var df;
+        var geojson = {
+            'type': 'FeatureCollection',
+            'features': []
+        };
+        var dataPopuler={
+                        labels: [],
+                        datasets: [{
+                            label: '# popularity',
+                            data: [],
+                            backgroundColor: [],
+                            borderColor: [],
+                            borderWidth: 1
+                        }]
+                    };
+
+function random_rgba() {
+    var o = Math.round, r = Math.random, s = 255;
+    return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
+}
+var myChart;
+var map;
+var lat = data.loc.geometry.coordinates[0];
+var long  =data.loc.geometry.coordinates[1];
+showHasil(lat,long);
+function showHasil(lat,long){
+   $('#btn-cari-lokasi').fadeOut();
+    mapboxgl.accessToken = 'pk.eyJ1Ijoia3ViZWdpcyIsImEiOiJjazd1bHp1ZWMxMnhxM2xucWwyY2psbTJvIn0.xKBnJu7oqoAWuB_Ynv42GA';
+    map = new mapboxgl.Map({
+        container: 'map2',
+        style: 'mapbox://styles/mapbox/outdoors-v11',
+        center: [lat,long],
+        zoom: 15
+    });
+
+    var popup = new mapboxgl.Popup({ closeOnClick: false })
+    .setLngLat([lat,long])
+    .setHTML('Here Your Place')
+    .addTo(map);
+
+    var marker = new mapboxgl.Marker({
+        draggable: false
+    })
+        .setLngLat([lat,long])
+        .addTo(map);
+
+
+        map.flyTo({
+            center: [lat,long],
+            essential: true // this animation is considered essential with respect to prefers-reduced-motion
+        });
+
+        function liatToko(data) {
+            console.log(data);
+            $('#tokoModal').modal('show');
+            $('#exampleModalLabel').text(data.name);
+            $('#tokoImg').attr('src','https://maps.googleapis.com/maps/api/place/photo?maxwidth='+data.photos[0].width+'&photoreference='+data.photos[0].photo_reference+'&key=AIzaSyANlGFBRSJtayKemhLJAcnSuwrD_wOG2Sk');
+            $('#alamat').text(data.vicinity);
+        }
+       
+        console.log('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.loc.geometry.coordinates[1]+','+data.loc.geometry.coordinates[0]+'&radius='+data.radius+'&type='+data.category+'&keyword='+data.product+'&key=AIzaSyANlGFBRSJtayKemhLJAcnSuwrD_wOG2Sk');
+    // add markers to map
+    $.ajax({
+            url: 'http://localhost/map.php', 
+            type: "GET",data:{url:'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.loc.geometry.coordinates[1]+','+data.loc.geometry.coordinates[0]+'&radius='+data.radius+'&type='+data.category+'&keyword='+data.product+'&key=AIzaSyANlGFBRSJtayKemhLJAcnSuwrD_wOG2Sk'},   
+            contentType: "json",
+            cache: false,
+            success: function(response){                          
+                df =JSON.parse(response);       
+                for (let x = 0; x < df.results.length; x++) {
+                    var newgson = {
+                        type:'Feature',
+                        properties:{
+                            message: '',
+                            icon:'',
+                            iconSize: [60, 60],
+                            data:''
+                        },
+                        geometry:{
+                            type:'Point',
+                            coordinates:[0,0]
+                        }
+                    }
+
+
+                 dataPopuler.labels.push(df.results[x].name);
+                 dataPopuler.datasets[0].data.push(df.results[x].user_ratings_total);
+                 dataPopuler.datasets[0].backgroundColor.push(random_rgba()); 
+                 dataPopuler.datasets[0].borderColor.push(random_rgba()); 
+                newgson.properties.message = df.results[x].name;
+                newgson.properties.icon = df.results[x].icon;
+                newgson.geometry.coordinates[0] = df.results[x].geometry.location.lng;
+                newgson.geometry.coordinates[1] = df.results[x].geometry.location.lat;
+                newgson.properties.data = df.results[x];
+                console.log(newgson);
+                geojson.features.push(newgson);
+                }   
+                
+                
+
+                geojson.features.forEach(function(marker) {
+                    // create a DOM element for the marker
+                    var el = document.createElement('div');
+                    el.className = 'marker';
+                    el.style.backgroundImage ='url(\''+'https://img.icons8.com/fluent/48/000000/shop.png'+'\')';
+                 
+                    el.style.width = marker.properties.iconSize[0] + 'px';
+                    el.style.height = marker.properties.iconSize[1] + 'px';
+
+                    el.addEventListener('click', function() {
+                        liatToko(marker.properties.data);
+                    });
+
+                    // add marker to map
+                    new mapboxgl.Marker(el)
+                        .setLngLat(marker.geometry.coordinates)
+                        .addTo(map);
+                });
+
+                $('#hasil-persen').text('Competitor Rate : '+Math.floor(((1/df.results.length*100)+80)/3)+'%');
+                $("#loader").hide();
+
+
+                var ctx = document.getElementById("rating").getContext('2d');
+                myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: dataPopuler,
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero:true
+                                }
+                            }]
+                        },
+                        onClick: cari
+                    }
+                });
+
+                
+
+
+            }           
+        }); 
+        function cari(evt){
+                    var activePoints = myChart.getElementsAtEventForMode(evt, 'point', myChart.options);
+                    var firstPoint = activePoints[0];
+                    var label = myChart.data.labels[firstPoint._index];
+                    var value = myChart.data.datasets[firstPoint._datasetIndex].data[firstPoint._index];
+                    console.log(label + ": " + value);
+                    window.scrollTo(500, 0); 
+                    for (let x = 0; x < df.results.length; x++) {
+                        
+                        if(df.results[x].name==label){
+                            
+                            map.flyTo({
+                                center: [df.results[x].geometry.location.lng,df.results[x].geometry.location.lat],
+                                essential: true, // this animation is considered essential with respect to prefers-reduced-motion
+                                zoom:20
+                            });
+                        }
+                        
+                    }
+        }
+
+
+ }
+</script>
