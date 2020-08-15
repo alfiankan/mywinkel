@@ -55,7 +55,7 @@ function loginPage() {
   class saveData{
       
       produk(v){
-          data.product = v;
+          data.product = encodeURIComponent(v);
           console.log(data);
           $('#business-product').text(v);
       }
@@ -68,7 +68,7 @@ function loginPage() {
       }
   
       category(c){
-          data.category = c;
+          data.category = encodeURIComponent(c);
           console.log(data);
           $('#category-jual').text(c);
       }

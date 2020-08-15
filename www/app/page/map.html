@@ -105,7 +105,7 @@ function showHasil(lat,long){
     // add markers to map
     $.ajax({
             url: 'http://mywinkel.xyz/map.php', 
-            type: "GET",data:{url:encodeURI('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.loc.geometry.coordinates[1]+','+data.loc.geometry.coordinates[0]+'&radius='+data.radius+'&type='+data.category+'&keyword='+data.product+'&key=AIzaSyANlGFBRSJtayKemhLJAcnSuwrD_wOG2Sk')},   
+            type: "GET",data:{url:'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location='+data.loc.geometry.coordinates[1]+','+data.loc.geometry.coordinates[0]+'&radius='+data.radius+'&type='+data.category+'&keyword='+data.product+'&key=AIzaSyANlGFBRSJtayKemhLJAcnSuwrD_wOG2Sk'},   
             contentType: "json",
             cache: false,
             success: function(response){                          
